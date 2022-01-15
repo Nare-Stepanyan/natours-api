@@ -5,19 +5,19 @@ import {
   getUser,
   updateUser,
   deleteUser
-} from './../controllers/userController.js';
+} from '../controllers/userTestController.js';
 
-const userRouter = express.Router();
+const userTestRouter = express.Router();
 
-userRouter
+userTestRouter
   .route('/')
   .get(getAllUsers)
   .post(createUser);
 
-userRouter
+userTestRouter
   .route('/:id')
   .get(getUser)
   .patch(updateUser)
   .delete(deleteUser);
 
-export default userRouter;
+export default userTestRouter;

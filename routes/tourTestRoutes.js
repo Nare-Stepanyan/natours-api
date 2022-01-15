@@ -1,24 +1,27 @@
 import express from 'express';
 import {
+  checkID,
   getAllTours,
   checkBody,
   createTour,
   getTour,
   updateTour,
   deleteTour
-} from '../controllers/tourController.js';
+} from '../controllers/tourTestController.js';
 
-const tourRouter = express.Router();
+const tourTestRouter = express.Router();
 
-tourRouter
+tourTestRouter.param('id', checkID);
+
+tourTestRouter
   .route('/')
   .get(getAllTours)
   .post(checkBody, createTour);
 
-tourRouter
+tourTestRouter
   .route('/:id')
   .get(getTour)
   .patch(updateTour)
   .delete(deleteTour);
 
-export default tourRouter;
+export default tourTestRouter;

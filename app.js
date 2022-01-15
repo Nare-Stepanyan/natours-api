@@ -3,8 +3,9 @@ import morgan from 'morgan';
 import path from 'path';
 const __dirname = path.resolve();
 
+import tourTestRouter from './routes/tourTestRoutes.js';
+import userTestRouter from './routes/userTestRoutes.js';
 import tourRouter from './routes/tourRoutes.js';
-import userRouter from './routes/userRoutes.js';
 
 const app = express();
 
@@ -25,7 +26,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/api/v1/toursTest', tourTestRouter);
+app.use('/api/v1/usersTest', userTestRouter);
 app.use('/api/v1/tours', tourRouter);
-app.use('/api/v1/users', userRouter);
 
 export default app;
