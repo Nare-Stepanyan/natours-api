@@ -1,7 +1,6 @@
 import express from 'express';
 import {
   getAllTours,
-  checkBody,
   createTour,
   getTour,
   updateTour,
@@ -13,7 +12,7 @@ const tourRouter = express.Router();
 tourRouter
   .route('/')
   .get(getAllTours)
-  .post(checkBody, createTour);
+  .post(createTour);
 
 tourRouter
   .route('/:id')
