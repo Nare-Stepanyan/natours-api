@@ -1,7 +1,9 @@
-import express from 'express';
-import morgan from 'morgan';
+import dotenv from 'dotenv';
+dotenv.config({ path: './config.env' });
 import path from 'path';
 const __dirname = path.resolve();
+import express from 'express';
+import morgan from 'morgan';
 
 import tourTestRouter from './routes/tourTestRoutes.js';
 import userTestRouter from './routes/userTestRoutes.js';
