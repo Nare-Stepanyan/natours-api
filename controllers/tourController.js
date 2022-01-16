@@ -1,5 +1,11 @@
 import Tour from '../models/tourModel.js';
 
+export const aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage, summary, difficulty';
+  next();
+};
 export const getAllTours = async (req, res) => {
   try {
     // filtering
@@ -23,6 +29,28 @@ export const getAllTours = async (req, res) => {
       query = query.sort(sortBy);
     } else query = query.sort('-createdAt');
 
+    // fields limiting
+
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+      query = query.select(fields);
+    } else {
+      query = query.select('-__v');
+    }
+
+    // pagination
+
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+
+    query = query.skip(skip).limit(limit);
+
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) throw new Error('This page does not exist');
+    }
+
     const tours = await query;
     res.status(200).json({
       status: 'success',
@@ -35,7 +63,7 @@ export const getAllTours = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       status: 'failed',
-      message: err
+      message: err.message
     });
   }
 };

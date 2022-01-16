@@ -4,10 +4,13 @@ import {
   createTour,
   getTour,
   updateTour,
-  deleteTour
+  deleteTour,
+  aliasTopTours
 } from '../controllers/tourController.js';
 
 const tourRouter = express.Router();
+
+tourRouter.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 
 tourRouter
   .route('/')
