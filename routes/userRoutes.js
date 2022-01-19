@@ -6,7 +6,12 @@ import {
   updateUser,
   deleteUser
 } from '../controllers/userController.js';
-import { signup, login } from '../controllers/authController.js';
+import {
+  signup,
+  login,
+  restrictTo,
+  protect
+} from '../controllers/authController.js';
 
 const userRouter = express.Router();
 
