@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from './../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
+import sendEmail from '../utils/email.js';
 
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -17,7 +18,9 @@ export const signup = catchAsync(async (req, res, next) => {
     password,
     passwordConfirm,
     passwordChangedAt,
-    role
+    role,
+    passwordResetToken,
+    passwordResetExpires
   } = req.body;
   const newUser = await User.create({
     name,
@@ -25,7 +28,9 @@ export const signup = catchAsync(async (req, res, next) => {
     password,
     passwordConfirm,
     passwordChangedAt,
-    role
+    role,
+    passwordResetToken,
+    passwordResetExpires
   });
   const token = signToken(newUser._id);
   res.status(201).json({
@@ -98,3 +103,43 @@ export const restrictTo = (...roles) => {
     next();
   };
 };
+
+export const forgotPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    const message = `There is no user with that email address`;
+    return next(new AppError(message, 404));
+  }
+
+  const resetToken = user.createPasswordResetToken();
+  await user.save({
+    validateBeforeSave: false
+  });
+
+  const resetURL = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/users/resetPassword/${resetToken}`;
+  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you did'nt forget your password, please ignore this email!`;
+  const subject = 'Your password reset token (valid for 10 min)';
+  const options = {
+    email: req.body.email,
+    subject,
+    message
+  };
+  try {
+    await sendEmail(options);
+    res.status(200).json({
+      status: 'success',
+      message: 'Token sent to email!'
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    const message = `There was an error sending the email. Try again later!`;
+    return next(new AppError(message, 500));
+  }
+});
+
+export const resetPassword = (req, res, next) => {};
