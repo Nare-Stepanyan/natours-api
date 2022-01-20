@@ -1,4 +1,5 @@
 import { promisify } from 'util';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import User from './../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
@@ -6,6 +7,7 @@ import AppError from '../utils/appError.js';
 import sendEmail from '../utils/email.js';
 
 const signToken = id => {
+  console.log(id, 'id');
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN
   });
@@ -142,4 +144,31 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
-export const resetPassword = (req, res, next) => {};
+export const resetPassword = catchAsync(async (req, res, next) => {
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gte: Date.now() }
+  });
+
+  if (!user) {
+    const message = `Token is invalid or has expired`;
+    return next(new AppError(message, 400));
+  }
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetExpires = undefined;
+  user.passwordResetToken = undefined;
+  await user.save();
+
+  const token = signToken(user._id);
+  res.status(200).json({
+    status: 'success',
+    token
+  });
+});
