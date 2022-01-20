@@ -34,15 +34,19 @@ export const signup = catchAsync(async (req, res, next) => {
     passwordResetToken,
     passwordResetExpires
   });
-  const token = signToken(newUser._id);
-  res.status(201).json({
+  createSendToken(newUser, 201, res);
+});
+
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+  res.status(statusCode).json({
     status: 'success',
     token,
     data: {
-      user: newUser
+      user
     }
   });
-});
+};
 
 export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -55,12 +59,7 @@ export const login = catchAsync(async (req, res, next) => {
     const message = 'Incorrect email or password';
     return next(new AppError(message, 401));
   }
-
-  const token = signToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token
-  });
+  createSendToken(user, 200, res);
 });
 
 export const protect = catchAsync(async (req, res, next) => {
@@ -166,9 +165,19 @@ export const resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetToken = undefined;
   await user.save();
 
-  const token = signToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token
-  });
+  createSendToken(user, 200, res);
+});
+
+export const updatePassword = catchAsync(async (req, res, next) => {
+  const id = req.user.id;
+  const user = await User.findById({ _id: id }).select('password');
+  if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+    const message = `Your current password is wrong!`;
+    return next(new AppError(message, 401));
+  }
+
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.password = req.body.password;
+  await user.save();
+  createSendToken(user, 201, res);
 });
