@@ -16,6 +16,7 @@ import tourTestRouter from './routes/tourTestRoutes.js';
 import userTestRouter from './routes/userTestRoutes.js';
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import reviewRouter from './routes/reviewRoutes.js';
 
 const app = express();
 
@@ -82,6 +83,7 @@ app.use('/api/v1/toursTest', tourTestRouter);
 app.use('/api/v1/usersTest', userTestRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
   const message = `Can't find the ${req.originalUrl} on this server`;
