@@ -6,7 +6,8 @@ import {
   updateUser,
   deleteUser,
   updateCurrentUser,
-  deleteCurrentUser
+  deleteCurrentUser,
+  getCurrentUser
 } from '../controllers/userController.js';
 import {
   signup,
@@ -24,9 +25,16 @@ userRouter.post('/signup', signup);
 userRouter.post('/login', login);
 userRouter.post('/forgotPassword', forgotPassword);
 userRouter.patch('/resetPassword/:token', resetPassword);
-userRouter.patch('/updateMyPassword', protect, updatePassword);
-userRouter.patch('/updateCurrentUser', protect, updateCurrentUser);
-userRouter.delete('/deleteCurrentUser', protect, deleteCurrentUser);
+
+// Protect all routes after this middleware
+userRouter.use(protect);
+
+userRouter.get('/currentUser', getCurrentUser, getUser);
+userRouter.patch('/updateMyPassword', updatePassword);
+userRouter.patch('/updateCurrentUser', updateCurrentUser);
+userRouter.delete('/deleteCurrentUser', deleteCurrentUser);
+
+userRouter.use(restrictTo('admin'));
 
 userRouter
   .route('/')
