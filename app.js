@@ -17,8 +17,15 @@ import userTestRouter from './routes/userTestRoutes.js';
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import reviewRouter from './routes/reviewRoutes.js';
+import viewRouter from './routes/viewRoutes.js';
 
 const app = express();
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+// Serving static files
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Global middlewares
 
@@ -65,9 +72,6 @@ app.use(
   })
 );
 
-// Serving static files
-app.use(express.static(`${__dirname}/public`));
-
 // Test middleware
 app.use((req, res, next) => {
   console.log('Hello from the middleware 👋');
@@ -78,6 +82,10 @@ app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
 });
+
+// ROUTES
+
+app.use('/', viewRouter);
 
 app.use('/api/v1/toursTest', tourTestRouter);
 app.use('/api/v1/usersTest', userTestRouter);
