@@ -7,7 +7,9 @@ import {
   deleteUser,
   updateCurrentUser,
   deleteCurrentUser,
-  getCurrentUser
+  getCurrentUser,
+  uploadUserPhoto,
+  resizeUserPhoto
 } from '../controllers/userController.js';
 import {
   signup,
@@ -33,7 +35,12 @@ userRouter.use(protect);
 
 userRouter.get('/currentUser', getCurrentUser, getUser);
 userRouter.patch('/updateMyPassword', updatePassword);
-userRouter.patch('/updateCurrentUser', updateCurrentUser);
+userRouter.patch(
+  '/updateCurrentUser',
+  uploadUserPhoto,
+  resizeUserPhoto,
+  updateCurrentUser
+);
 userRouter.delete('/deleteCurrentUser', deleteCurrentUser);
 
 userRouter.use(restrictTo('admin'));
