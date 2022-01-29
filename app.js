@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import xss from 'xss-clean';
+import cors from 'cors';
 dotenv.config({ path: './config.env' });
 import path from 'path';
 const __dirname = path.resolve();
@@ -9,6 +10,8 @@ import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import ExpressMongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
+import cookieParser from 'cookie-parser';
+
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
 
@@ -20,6 +23,12 @@ import reviewRouter from './routes/reviewRoutes.js';
 import viewRouter from './routes/viewRoutes.js';
 
 const app = express();
+
+app.use(
+  cors({
+    'Cross-Origin-Resource-Policy': 'cross-origin'
+  })
+);
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -51,6 +60,11 @@ app.use(
     limit: '10kb'
   })
 );
+
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+// reading data from cookie
+
+app.use(cookieParser());
 
 // Data sanitization against NoSQL query injection
 app.use(ExpressMongoSanitize());
@@ -84,7 +98,6 @@ app.use((req, res, next) => {
 });
 
 // ROUTES
-
 app.use('/', viewRouter);
 
 app.use('/api/v1/toursTest', tourTestRouter);
