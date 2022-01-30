@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
+dotenv.config({ path: './config.env' });
 import xss from 'xss-clean';
 import cors from 'cors';
-dotenv.config({ path: './config.env' });
 import path from 'path';
 const __dirname = path.resolve();
 import express from 'express';
@@ -21,6 +21,7 @@ import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import reviewRouter from './routes/reviewRoutes.js';
 import viewRouter from './routes/viewRoutes.js';
+import bookingRouter from './routes/bookingRoutes.js';
 
 const app = express();
 
@@ -39,8 +40,43 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Global middlewares
 
 // Set security HTTP headers
-app.use(helmet());
 
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'", 'data:', 'blob:', 'https:', 'ws:'],
+        baseUri: ["'self'"],
+        fontSrc: ["'self'", 'https:', 'data:'],
+        scriptSrc: [
+          "'self'",
+          'https:',
+          'http:',
+          'blob:',
+          'https://*.mapbox.com',
+          'https://js.stripe.com',
+          'https://*.cloudflare.com'
+        ],
+        frameSrc: ["'self'", 'https://js.stripe.com'],
+        objectSrc: ['none'],
+        styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+        workerSrc: ["'self'", 'data:', 'blob:'],
+        childSrc: ["'self'", 'blob:'],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        connectSrc: [
+          "'self'",
+          'blob:',
+          'wss:',
+          'https://*.tiles.mapbox.com',
+          'https://api.mapbox.com',
+          'https://events.mapbox.com'
+        ],
+        upgradeInsecureRequests: []
+      }
+    }
+  })
+);
 // Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -105,6 +141,7 @@ app.use('/api/v1/usersTest', userTestRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 
 app.all('*', (req, res, next) => {
   const message = `Can't find the ${req.originalUrl} on this server`;
