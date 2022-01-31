@@ -150,7 +150,6 @@ tourSchema.pre('save', async function(next) {
 */
 
 tourSchema.post('save', function(doc, next) {
-  console.log(doc);
   next();
 });
 

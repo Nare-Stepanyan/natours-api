@@ -11,6 +11,7 @@ import helmet from 'helmet';
 import ExpressMongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
@@ -127,6 +128,8 @@ app.use((req, res, next) => {
   console.log('Hello from the middleware 👋');
   next();
 });
+
+app.use(compression());
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
